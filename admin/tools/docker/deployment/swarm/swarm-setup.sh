@@ -15,6 +15,10 @@ DIR=$(cd "$(dirname "$0")"; pwd -P)
 export TOKEN=$(docker run --rm swarm create)
 echo "Docker Swarm token: $TOKEN"
 
+# Create a swarm on the openstack machine dedicated to swarm
+HOST_IP=$(getent hosts $(hostname) | awk '{{ print $1 }}')
+docker swarm init --advertise-addr "$HOST_IP"
+
 # Swarm node side
 # Join swarm nodes
 for i in $(seq 0 $INSTANCE_LAST_ID)
