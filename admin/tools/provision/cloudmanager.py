@@ -434,7 +434,7 @@ write_files:
 
     # @author  Fabrice Jammes, IN2P3
 
-    INSTANCE_LAST_ID={instance_last_id}
+    WORKER_LAST_ID={instance_last_id}
     HOSTNAME_TPL="{hostname_tpl}"
 
     DOCKER_PORT=2375

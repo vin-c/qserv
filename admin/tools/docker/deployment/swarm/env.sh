@@ -5,7 +5,7 @@
 # example: u_fjammes_DM-4295
 VERSION=dev
 
-NB_WORKERS=$INSTANCE_LAST_ID
+NB_WORKERS=$WORKER_LAST_ID
 
 # `docker run` settings
 # =====================

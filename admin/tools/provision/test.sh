@@ -75,12 +75,25 @@ fi
 
 if [ -n "$SWARM" ]; then
 	SWARM_DIR="$DIR/../docker/deployment/swarm"
+	SSH="ssh -F $DIR/ssh_config"
     echo "Launch integration tests using Swarm"
-    ssh -F ./ssh_config "$SWARM_NODE" "$SWARM_DIR/1_swarm-manager-create.sh"
-    JOIN_CMD="$(ssh -F ./ssh_config "$SWARM_NODE" "$SWARM_DIR/1_swarm-manager-print-join-cmd.sh")"
+    "$SSH" "$SWARM_NODE" "$SWARM_DIR/1_swarm-manager-create.sh"
+    JOIN_CMD="$("$SSH" "$SWARM_NODE" "$SWARM_DIR/2_swarm-manager-print-join-cmd.sh")"
+
+    echo "$JOIN_CMD"
+
+    # Join swarm nodes:
+    #   - Qserv master has index 0
+    #   - QServ workers have indexes >= 1
+    for i in $(seq 0 $WORKER_LAST_ID)
+    do
+        QSERV_NODE="$HOSTNAME_TPL$i"
+        echo "Join $QSERV_NODE to swarm cluster"
+	    "$SSH" "$QSERV_NODE" "$JOIN_CMD"
+    done
 
     echo "Launch multinode tests"
-    ssh -F ./ssh_config "$SWARM_NODE" "$SWARM_DIR/run-multinode-tests.sh"
+    "$SSH" "$SWARM_NODE" "$SWARM_DIR/run-multinode-tests.sh"
 
 elif [ -n "$SHMUX" ]; then
 
