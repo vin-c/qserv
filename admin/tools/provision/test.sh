@@ -74,14 +74,14 @@ fi
 . "$DIR/integration-tests-env.sh"
 
 if [ -n "$SWARM" ]; then
+	SWARM_DIR="$DIR/../docker/deployment/swarm"
     echo "Launch integration tests using Swarm"
-    echo "Configure Swarm node"
-    ssh -F ./ssh_config "$SWARM_NODE" \
-        /home/qserv/src/qserv/admin/tools/docker/deployment/swarm/swarm-setup.sh
+    ssh -F ./ssh_config "$SWARM_NODE" "$SWARM_DIR/1_swarm-manager-create.sh"
+    JOIN_CMD="$(ssh -F ./ssh_config "$SWARM_NODE" "$SWARM_DIR/1_swarm-manager-print-join-cmd.sh")"
 
     echo "Launch multinode tests"
-    ssh -F ./ssh_config "$SWARM_NODE" \
-        /home/qserv/src/qserv/admin/tools/docker/deployment/swarm/run-multinode-tests.sh
+    ssh -F ./ssh_config "$SWARM_NODE" "$SWARM_DIR/run-multinode-tests.sh"
+
 elif [ -n "$SHMUX" ]; then
 
     echo "Launch integration tests using shmux"
