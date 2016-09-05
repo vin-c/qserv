@@ -10,8 +10,6 @@ DIR=$(cd "$(dirname "$0")"; pwd -P)
 . "${DIR}/swarm-env.sh"
 . "${DIR}/env.sh"
 
-export DOCKER_HOST=tcp://$SWARM_HOSTNAME:$SWARM_PORT
-
 usage() {
   cat << EOD
 
@@ -51,8 +49,8 @@ MASTER_OPT="-e QSERV_MASTER=$MASTER"
 QSERV_NETWORK="qserv-network"
 NETWORK_OPT="--network=$QSERV_NETWORK"
 
-docker rm -f "$MASTER" || echo "No existing container for $MASTER"
-docker service create -e "constraint:node==$MASTER" \
+docker service rm "$MASTER" || echo "No existing container for $MASTER"
+docker service create --constraint node="$MASTER" \
     $DATA_VOLUME_OPT \
     $LOG_VOLUME_OPT \
     $MASTER_OPT \
@@ -62,8 +60,8 @@ docker service create -e "constraint:node==$MASTER" \
 
 for i in $WORKERS;
 do
-    docker rm -f "$i" || echo "No existing container for $i"
-    docker service create -e "constraint:node==$i" \
+    docker service rm "$i" || echo "No existing container for $i"
+    docker service create --constraint node="$i" \
 	    $DATA_VOLUME_OPT \
         $LOG_VOLUME_OPT \
         $MASTER_OPT \
