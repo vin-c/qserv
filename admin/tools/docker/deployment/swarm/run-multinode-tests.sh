@@ -47,8 +47,7 @@ if [ -n "$HOST_DATA_DIR" ]; then
 fi
 
 docker rm -f "$MASTER" || echo "No existing container for $MASTER"
-docker run -e "constraint:node==$MASTER" \
-    --detach=true \
+docker service create -e "constraint:node==$MASTER" \
     -e "QSERV_MASTER=$MASTER" \
     $DATA_VOLUME_OPT \
     $LOG_VOLUME_OPT \
@@ -59,7 +58,7 @@ docker run -e "constraint:node==$MASTER" \
 for i in $WORKERS;
 do
     docker rm -f "$i" || echo "No existing container for $i"
-    docker run -e "constraint:node==$i" \
+    docker service create -e "constraint:node==$i" \
         --detach=true \
         -e "QSERV_MASTER=$MASTER" \
         $DATA_VOLUME_OPT \
