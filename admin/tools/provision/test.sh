@@ -75,10 +75,11 @@ fi
 
 if [ -n "$SWARM" ]; then
 	SWARM_DIR="$DIR/../docker/deployment/swarm"
-	SSH="ssh -F $DIR/ssh_config"
+	SSH_CFG="$DIR/ssh_config"
     echo "Launch integration tests using Swarm"
-    "$SSH" "$SWARM_NODE" "$SWARM_DIR/1_swarm-manager-create.sh"
-    JOIN_CMD="$("$SSH" "$SWARM_NODE" "$SWARM_DIR/2_swarm-manager-print-join-cmd.sh")"
+    ssh -F "$SSH_CFG" "$SWARM_NODE" "docker swarm leave --force" || true
+    ssh -F "$SSH_CFG" "$SWARM_NODE" "$SWARM_DIR/1_swarm-manager-create.sh"
+    JOIN_CMD="$(ssh -F "$SSH_CFG" "$SWARM_NODE" "$SWARM_DIR/2_swarm-manager-print-join-cmd.sh")"
 
     echo "$JOIN_CMD"
 
@@ -89,11 +90,12 @@ if [ -n "$SWARM" ]; then
     do
         QSERV_NODE="$HOSTNAME_TPL$i"
         echo "Join $QSERV_NODE to swarm cluster"
-	    "$SSH" "$QSERV_NODE" "$JOIN_CMD"
+        ssh -F "$SSH_CFG" "$QSERV_NODE" "docker swarm leave --force" || true
+	    ssh -F "$SSH_CFG" "$QSERV_NODE" "$JOIN_CMD"
     done
 
     echo "Launch multinode tests"
-    "$SSH" "$SWARM_NODE" "$SWARM_DIR/run-multinode-tests.sh"
+    ssh -F "$SSH_CFG" "$SWARM_NODE" "$SWARM_DIR/run-multinode-tests.sh"
 
 elif [ -n "$SHMUX" ]; then
 

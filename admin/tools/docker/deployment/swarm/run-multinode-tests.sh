@@ -46,25 +46,33 @@ if [ -n "$HOST_DATA_DIR" ]; then
     DATA_VOLUME_OPT="--volume $HOST_DATA_DIR:/qserv/data"
 fi
 
+MASTER_OPT="-e QSERV_MASTER=$MASTER"
+
+QSERV_NETWORK="qserv-network"
+NETWORK_OPT="--network=$QSERV_NETWORK"
+
 docker rm -f "$MASTER" || echo "No existing container for $MASTER"
 docker service create -e "constraint:node==$MASTER" \
-    -e "QSERV_MASTER=$MASTER" \
     $DATA_VOLUME_OPT \
     $LOG_VOLUME_OPT \
+    $MASTER_OPT \
+    $NETWORK_OPT \
     --name "$MASTER" \
-    --net=host \
     "$MASTER_IMAGE"
 
 for i in $WORKERS;
 do
     docker rm -f "$i" || echo "No existing container for $i"
     docker service create -e "constraint:node==$i" \
-        --detach=true \
-        -e "QSERV_MASTER=$MASTER" \
+	    $DATA_VOLUME_OPT \
+        $LOG_VOLUME_OPT \
+        $MASTER_OPT \
+        $NETWORK_OPT \
+        $MASTER_OPT \
         $DATA_VOLUME_OPT \
         $LOG_VOLUME_OPT \
         --name "$i" \
-        --net=host \
+        --network="$QSERV_NETWORK" \
         "$WORKER_IMAGE"
 
 done

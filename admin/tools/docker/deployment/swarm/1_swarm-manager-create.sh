@@ -11,7 +11,11 @@ DIR=$(cd "$(dirname "$0")"; pwd -P)
 
 . "${DIR}/swarm-env.sh"
 
+QSERV_NETWORK="qserv-network"
+
 # Create a swarm on the openstack machine dedicated to swarm
 HOST_IP=$(hostname --ip-address)
 docker swarm init --advertise-addr "$HOST_IP"
 
+# Create swarm network to enable communication between containers
+docker network create --driver overlay "$QSERV_NETWORK"
