@@ -44,10 +44,10 @@ if [ -n "$HOST_DATA_DIR" ]; then
     DATA_VOLUME_OPT="--mount type=bind,src=$HOST_DATA_DIR,dst=/qserv/data"
 fi
 
-MASTER_OPT="-e QSERV_MASTER=$MASTER"
+MASTER_OPT="-e QSERV_MASTER=master"
 
 QSERV_NETWORK="qserv-network"
-NETWORK_OPT="--network=$QSERV_NETWORK"
+NETWORK_OPT="--network $QSERV_NETWORK"
 
 docker service rm "$MASTER" || echo "No existing container for $MASTER"
 docker service create --constraint node.hostname=="$MASTER" \
@@ -55,9 +55,11 @@ docker service create --constraint node.hostname=="$MASTER" \
     $LOG_VOLUME_OPT \
     $MASTER_OPT \
     $NETWORK_OPT \
-    --name "$MASTER" \
-    "$MASTER_IMAGE"
+    --name "master" \
+    "$MASTER_IMAGE" \
+    tail -f /dev/null
 
+j=1
 for i in $WORKERS;
 do
     docker service rm "$i" || echo "No existing container for $i"
@@ -66,11 +68,9 @@ do
         $LOG_VOLUME_OPT \
         $MASTER_OPT \
         $NETWORK_OPT \
-        $MASTER_OPT \
-        $DATA_VOLUME_OPT \
-        $LOG_VOLUME_OPT \
-        --name "$i" \
-        --network="$QSERV_NETWORK" \
-        "$WORKER_IMAGE"
+        --name "worker-$j" \
+        "$WORKER_IMAGE" \
+	    tail -f /dev/null
+    j=$((j+1));
 
 done
