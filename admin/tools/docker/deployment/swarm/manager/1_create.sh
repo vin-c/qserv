@@ -7,15 +7,17 @@
 set -e
 set -x
 
-DIR=$(cd "$(dirname "$0")"; pwd -P)
-
-. "${DIR}/swarm-env.sh"
-
 QSERV_NETWORK="qserv-network"
+
+DIR=$(cd "$(dirname "$0")"; pwd -P)
 
 # Create a swarm on the openstack machine dedicated to swarm
 HOST_IP=$(hostname --ip-address)
+docker swarm leave || true
 docker swarm init --advertise-addr "$HOST_IP"
 
 # Create swarm network to enable communication between containers
+docker network rm "$QSERV_NETWORK" || true
 docker network create --driver overlay "$QSERV_NETWORK"
+
+
