@@ -49,28 +49,26 @@ MASTER_OPT="-e QSERV_MASTER=master"
 QSERV_NETWORK="qserv-network"
 NETWORK_OPT="--network $QSERV_NETWORK"
 
-docker service rm "$MASTER" || echo "No existing container for $MASTER"
+docker service rm master || echo "No existing container for $MASTER"
 docker service create --constraint node.hostname=="$MASTER" \
     $DATA_VOLUME_OPT \
     $LOG_VOLUME_OPT \
     $MASTER_OPT \
     $NETWORK_OPT \
     --name "master" \
-    "$MASTER_IMAGE" \
-    tail -f /dev/null
+    "$MASTER_IMAGE" $ALT_CMD
 
 j=1
 for i in $WORKERS;
 do
-    docker service rm "$i" || echo "No existing container for $i"
+    docker service rm "worker-$j" || echo "No existing container for $i"
     docker service create --constraint node.hostname=="$i" \
 	    $DATA_VOLUME_OPT \
         $LOG_VOLUME_OPT \
         $MASTER_OPT \
         $NETWORK_OPT \
         --name "worker-$j" \
-        "$WORKER_IMAGE" \
-	    tail -f /dev/null
+        "$WORKER_IMAGE" $ALT_CMD
     j=$((j+1));
 
 done
