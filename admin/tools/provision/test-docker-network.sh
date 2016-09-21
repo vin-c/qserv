@@ -14,11 +14,11 @@ SSH_CFG="$DIR/ssh_config"
 
 for qserv_node in $MASTER $WORKERS 
 do
-	ssh -F "$SSH_CFG" "$qserv_node" "CONTAINER_ID=$(docker ps -l -q) && \
-		docker exec -it \${CONTAINER_ID} ping master"
-	for i in $(seq 0 $WORKER_LAST_ID)
+	ssh -t -F "$SSH_CFG" "$qserv_node" "CONTAINER_ID=\$(docker ps -l -q) && \
+		docker exec -it \${CONTAINER_ID} ping -c 2 master"
+	for i in $(seq 1 $WORKER_LAST_ID)
 	do
-	    ssh -F "$SSH_CFG" "$qserv_node" "CONTAINER_ID=$(docker ps -l -q) && \
-			docker exec -it \${CONTAINER_ID} ping worker-$i"
+	    ssh -t -F "$SSH_CFG" "$qserv_node" "CONTAINER_ID=\$(docker ps -l -q) && \
+			docker exec -it \${CONTAINER_ID} ping -c 2 worker-$i"
 	done
 done
