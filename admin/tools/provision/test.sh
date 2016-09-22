@@ -11,7 +11,7 @@
 # @author  Fabrice Jammes, IN2P3
 
 set -e
-# set -x
+set -x
 
 DIR=$(cd "$(dirname "$0")"; pwd -P)
 
@@ -106,7 +106,7 @@ if [ -n "$SWARM" ]; then
 
     echo "Launch multinode tests"
 	scp -F "$SSH_CFG" "$SWARM_DIR/run-multinode-tests.sh" "$MASTER":/home/qserv 
-    ssh -F "$SSH_CFG" "$SWARM_NODE" "$SWARM_DIR/run-multinode-tests.sh"
+    ssh -F "$SSH_CFG" "$SWARM_NODE" "/home/qserv/run-multinode-tests.sh"
 
 elif [ -n "$SHMUX" ]; then
 
