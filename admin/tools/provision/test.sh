@@ -80,7 +80,10 @@ if [ -n "$SWARM" ]; then
 
 	scp -F "$SSH_CFG" -r "$SWARM_DIR/manager" "$SWARM_NODE":/home/qserv 
     scp -F "$SSH_CFG" "$DIR/env-infrastructure.sh" "${SWARM_NODE}:/home/qserv/manager"
-    ssh -F "$SSH_CFG" "$SWARM_NODE" "docker swarm leave --force" || true
+	ssh -F "$SSH_CFG" "$SWARM_NODE" "docker swarm leave --force" || true
+    ssh -F "$SSH_CFG" "$SWARM_NODE" "/home/qserv/manager/1_create.sh"
+	# restart swarm to fix network issue
+	ssh -F "$SSH_CFG" "$SWARM_NODE" "docker swarm leave --force" || true
     ssh -F "$SSH_CFG" "$SWARM_NODE" "/home/qserv/manager/1_create.sh"
     JOIN_CMD="$(ssh -F "$SSH_CFG" "$SWARM_NODE" "/home/qserv/manager/2_print-join-cmd.sh")"
 
