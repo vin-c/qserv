@@ -13,5 +13,6 @@ SSH_CFG="$DIR/ssh_config"
 
 for qserv_node in $MASTER $WORKERS 
 do
-	ssh -t -F "$SSH_CFG" "$qserv_node" "docker network inspect -f '{{range .Containers}}{{.Name}}:  {{.IPv4Address}}{{end}}' qserv"
+	ssh -t -F "$SSH_CFG" "$qserv_node" "CONTAINER_ID=\$(docker ps -l -q) && \
+		                        docker exec -it \${CONTAINER_ID} ip addr show eth0"
 done
