@@ -81,8 +81,8 @@ if [ -n "$SWARM" ]; then
     for node in "$MASTER" $WORKERS "$SWARM_NODE"
     do
         echo "Request $node to leave swarm cluster"
-        ssh -F "$SSH_CFG" "$node" "docker swarm leave --force" || true
-        ssh -F "$SSH_CFG" "$node" "docker network rm qserv" || true
+        ssh -F "$SSH_CFG" "$node" "docker swarm leave --force; \
+			docker network rm qserv || true"
     done
 
 	scp -F "$SSH_CFG" -r "$SWARM_DIR/manager" "$SWARM_NODE":/home/qserv
@@ -112,8 +112,7 @@ if [ -n "$SWARM" ]; then
     done
 
     echo "Launch multinode tests"
-	scp -F "$SSH_CFG" "$SWARM_DIR/run-multinode-tests.sh" "$MASTER":/home/qserv
-    ssh -F "$SSH_CFG" "$SWARM_NODE" "/home/qserv/run-multinode-tests.sh"
+	"$DIR"/test-swarm-run-multinode-tests.sh
 
 elif [ -n "$SHMUX" ]; then
 

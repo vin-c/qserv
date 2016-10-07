@@ -54,6 +54,7 @@ docker service create --constraint node.hostname=="$MASTER" \
     $DATA_VOLUME_OPT \
     $LOG_VOLUME_OPT \
     $MASTER_OPT \
+    --endpoint-mode dnsrr \
     $NETWORK_OPT \
     --name "master" \
     "$MASTER_IMAGE" $ALT_CMD
@@ -66,6 +67,7 @@ do
 	    $DATA_VOLUME_OPT \
         $LOG_VOLUME_OPT \
         $MASTER_OPT \
+        --endpoint-mode dnsrr \
         $NETWORK_OPT \
         --name "worker-$j" \
         "$WORKER_IMAGE" $ALT_CMD
