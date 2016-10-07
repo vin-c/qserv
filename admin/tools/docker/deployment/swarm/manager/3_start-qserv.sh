@@ -46,7 +46,7 @@ fi
 
 MASTER_OPT="-e QSERV_MASTER=master"
 
-QSERV_NETWORK="qserv-network"
+QSERV_NETWORK="qserv"
 NETWORK_OPT="--network $QSERV_NETWORK"
 
 docker service rm master || echo "No existing container for $MASTER"

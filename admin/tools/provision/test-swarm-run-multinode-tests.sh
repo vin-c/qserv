@@ -27,5 +27,5 @@ ssh -F "$SSH_CFG" "$MASTER" "CONTAINER_ID=\$(docker ps -l -q) && \
 	docker exec \${CONTAINER_ID} bash -c '. /qserv/stack/loadLSST.bash && \
     setup qserv_distrib -t qserv-dev && \
     echo \"$CSS_INFO\" | qserv-admin.py && \
-    qserv-test-integration.py'"
+    qserv-test-integration.py -V DEBUG'"
 
