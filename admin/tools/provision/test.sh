@@ -80,26 +80,9 @@ if [ -n "$SWARM" ]; then
 	SSH_CFG="$SWARM_DIR/ssh_config"
     echo "Launch integration tests using Swarm"
 
-    for node in "$MASTER" $WORKERS "$SWARM_NODE"
-    do
-        echo "Request $node to leave swarm cluster"
-        ssh -F "$SSH_CFG" "$node" "docker swarm leave --force; \
-			docker network rm qserv || true"
-    done
+	"$SWARM_DIR"/swarm-destroy.sh
+	"$SWARM_DIR"/swarm-create.sh
 
-	scp -F "$SSH_CFG" -r "$SWARM_DIR/manager" "$SWARM_NODE":/home/qserv
-    scp -F "$SSH_CFG" "$SWARM_DIR/env-infrastructure.sh" "${SWARM_NODE}:/home/qserv/manager"
-    ssh -F "$SSH_CFG" "$SWARM_NODE" "/home/qserv/manager/1_create.sh"
-    JOIN_CMD="$(ssh -F "$SSH_CFG" "$SWARM_NODE" "/home/qserv/manager/2_print-join-cmd.sh")"
-
-    # Join swarm nodes:
-    #   - Qserv master has index 0
-    #   - QServ workers have indexes >= 1
-    for qserv_node in $MASTER $WORKERS
-    do
-        echo "Join $qserv_node to swarm cluster"
-		ssh -F "$SSH_CFG" "$qserv_node" "$JOIN_CMD"
-    done
 
     # Start Qserv
 	ssh -F "$SSH_CFG" "$SWARM_NODE" "/home/qserv/manager/3_start-qserv.sh"
