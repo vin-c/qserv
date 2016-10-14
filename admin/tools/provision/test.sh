@@ -75,7 +75,9 @@ fi
 
 if [ -n "$SWARM" ]; then
 	SWARM_DIR="$DIR/../docker/deployment/swarm"
-	SSH_CFG="$DIR/ssh_config"
+	ln -f "$DIR/ssh_config" "$SWARM_DIR"
+	ln -f "$DIR/env-infrastructure.sh" "$SWARM_DIR"
+	SSH_CFG="$SWARM_DIR/ssh_config"
     echo "Launch integration tests using Swarm"
 
     for node in "$MASTER" $WORKERS "$SWARM_NODE"
@@ -86,7 +88,7 @@ if [ -n "$SWARM" ]; then
     done
 
 	scp -F "$SSH_CFG" -r "$SWARM_DIR/manager" "$SWARM_NODE":/home/qserv
-    scp -F "$SSH_CFG" "$DIR/env-infrastructure.sh" "${SWARM_NODE}:/home/qserv/manager"
+    scp -F "$SSH_CFG" "$SWARM_DIR/env-infrastructure.sh" "${SWARM_NODE}:/home/qserv/manager"
     ssh -F "$SSH_CFG" "$SWARM_NODE" "/home/qserv/manager/1_create.sh"
     JOIN_CMD="$(ssh -F "$SSH_CFG" "$SWARM_NODE" "/home/qserv/manager/2_print-join-cmd.sh")"
 
@@ -97,8 +99,6 @@ if [ -n "$SWARM" ]; then
     do
         echo "Join $qserv_node to swarm cluster"
 		ssh -F "$SSH_CFG" "$qserv_node" "$JOIN_CMD"
-		#ssh -F "$SSH_CFG" "$qserv_node" "$JOIN_CMD \
-		#	--listen-addr \"\$(hostname --ip-address)\""
     done
 
     # Start Qserv
@@ -112,7 +112,7 @@ if [ -n "$SWARM" ]; then
     done
 
     echo "Launch multinode tests"
-	"$DIR"/test-swarm-run-multinode-tests.sh
+	"$SWARM_DIR"/test-swarm-run-multinode-tests.sh
 
 elif [ -n "$SHMUX" ]; then
 
