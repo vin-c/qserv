@@ -3,9 +3,7 @@
 # Destroy Swarm cluster and related network
 
 DIR=$(cd "$(dirname "$0")"; pwd -P)
-
 . "$DIR/env-infrastructure.sh"
-
 SSH_CFG="$DIR/ssh_config"
 
 echo "Destroy Swarm cluster and related network"

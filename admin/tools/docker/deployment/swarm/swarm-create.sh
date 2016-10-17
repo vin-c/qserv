@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# Create Swarm network 
+# Create Swarm cluster and Docker network 
 
 DIR=$(cd "$(dirname "$0")"; pwd -P)
-
 . "$DIR/env-infrastructure.sh"
 
 SSH_CFG="$DIR/ssh_config"
 
+echo "Create Swarm cluster and Docker overlay network"
 scp -F "$SSH_CFG" -r "$DIR/manager" "$SWARM_NODE":/home/qserv
 scp -F "$SSH_CFG" "$DIR/env-infrastructure.sh" "${SWARM_NODE}:/home/qserv/manager"
 ssh -F "$SSH_CFG" "$SWARM_NODE" "/home/qserv/manager/1_create.sh"

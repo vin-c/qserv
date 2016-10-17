@@ -78,24 +78,8 @@ if [ -n "$SWARM" ]; then
 	ln -f "$DIR/ssh_config" "$SWARM_DIR"
 	ln -f "$DIR/env-infrastructure.sh" "$SWARM_DIR"
 	SSH_CFG="$SWARM_DIR/ssh_config"
-    echo "Launch integration tests using Swarm"
 
-	"$SWARM_DIR"/swarm-destroy.sh
-	"$SWARM_DIR"/swarm-create.sh
-
-
-    # Start Qserv
-	ssh -F "$SSH_CFG" "$SWARM_NODE" "/home/qserv/manager/3_start-qserv.sh"
-
-    for qserv_node in $MASTER $WORKERS
-    do
-		echo "Wait for Qserv to start on $qserv_node"
-		scp -F "$SSH_CFG" "$SWARM_DIR/wait.sh" "$qserv_node":/home/qserv
-		ssh -F "$SSH_CFG" "$qserv_node" "/home/qserv/wait.sh"
-    done
-
-    echo "Launch multinode tests"
-	"$SWARM_DIR"/test-swarm-run-multinode-tests.sh
+	"$SWARM_DIR"/setup-and-test.sh
 
 elif [ -n "$SHMUX" ]; then
 
