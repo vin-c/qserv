@@ -1,0 +1,81 @@
+# default values are set for Galactica (LIMOS)
+# keypair : qserv-qserv
+# flavor #3 : m1.medium : 2c/4G/40G
+# image : centos7-qserv (ce467a12-3851-41fa-a694-e007ee4a25c3)
+
+# See http://docs.openstack.org/developer/heat/template_guide/hot_spec.html
+
+heat_template_version: 2015-10-15
+description: Launch VMs for qserv tests
+
+parameters:
+    key_name:
+        description: Name of an existing key pair to use for the instance
+        label: Key Name
+        type: string
+        constraints:
+            - custom_constraint: nova.keypair
+        default: qserv-qserv
+    flavor_id:
+        description: flavor (actually an integer)
+        label: Image ID
+        type: string
+        default: 3
+    image_id:
+        description: UUID of image
+        label: Instance ID
+        type: string
+        default: ce467a12-3851-41fa-a694-e007ee4a25c3
+    network_name:
+        description: Name of the network to connect to
+        label: Network Name
+        type: string
+        constraints:
+            - custom_constraint: neutron.network
+        default: petasky-net
+    subnet_name:
+        description: Name of the subnet to connect to
+        label: Subnet Name
+        type: string
+        constraints:
+            - custom_constraint: neutron.subnet
+        default: petasky-subnet
+    mount_point:
+        description: Name of the mount point
+        label: Mount point
+        type: string
+        default: /dev/vdb1
+    volume_00:
+        description: ID of the volume 00
+        label: Volume 00 ID
+        type: string
+        default: d6ec3b01-8c9a-4677-842f-c1d054b1fa6c
+
+resources:
+    instance_port:
+        type: OS::Neutron::Port
+        properties:
+            network: { get_param: network_name }
+            fixed_ips:
+                - subnet_id: { get_param: subnet_name }
+    instance_00:
+        type: OS::Nova::Server
+        properties:
+            key_name: { get_param: key_name }
+            image: { get_param: image_id }
+            flavor: { get_param: flavor_id }
+            networks:
+                - port: { get_resource: instance_port }
+    volume_attachment_00:
+        type: OS::Cinder::VolumeAttachment
+        properties:
+            volume_id: { get_param: volume_00 }
+            instance_uuid: { get_resource: instance_00 }
+            mountpoint: { get_param: mount_point }
+
+outputs:
+    instance_ip:
+        description: The IP address of the deployed instance
+        value: { get_attr: [ instance_00, first_address ] }
+
+# EOF
