@@ -1,0 +1,28 @@
+#cloud-config
+
+users:
+- name: qserv
+  gecos: "Qserv daemon"
+  groups: docker
+  lock-passwd: true
+  shell: /bin/bash
+  sudo: "ALL=(ALL) NOPASSWD:ALL"
+  ssh-authorized-keys:
+  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCaTEm2HSvs7JyS2aQpUSKtB0osuyfWQkl7SQ8U8GPHqkQd5k1HGeCS/GXQgk8ghlHJngsuV57mRKrefY7HkRjwQzmOqwoFXLJ7VS7Mu4AqIHNfwdxBxennYxW9fxZrlrPSRIsQIwXW6u3n7xB7qBr7jnEE3ob+4nzFX40h2tgtm0ZhUgeQoBqFsn0FFEn1DSixHxgRjthYHAfQVIJLosYM4k+cmDAlFLJ/7RmIEPYa3wjb8Chpy1Mx4VA0OwsXZo4rLdPhPAjmjagCcjn2hP+vum+DBmN9BeyjJZy6zOAZzdhXiANqMDEDIfUigBOk9Og9beNdYC3L0xjkS1VXI4C6iBt105fAjsOqzZiLIHbVsy1xdOeb+GG2OZLXqp0BJIQeP4i3+nPoKLlor6Ms18tRovT0OPlUt9Z/F4ocn+pSIqKNE2jDrJVDpi6H0S5ZhO9TMCi1UU6cFdi5LcUPvq6jeLj392tSOH9Mre6jolBzxLzlP6uLp6mrDZpRtnO4hJu4BMsMD4MNUJFdvGdkFTZ4V7AyVFpkLfRkqScvlkOOXOji9ll6FHl8c8VgyIClJrNb3c/PCoThTS0u44Skj9zqsTs9qqwp1aeH3m2AemLOe43R2heF4OP3+o3XjZb66XiftgGB5ogidmCxu+BIUVgs3qNvT/Jjm9LcgGGVf7vaRQ==
+
+#packages:
+#- git
+
+runcmd:
+- [sed, -i, 's,ExecStart=/usr/bin/dockerd,ExecStart=/usr/bin/dockerd -H unix:///var/run/docker.sock -H tcp://0.0.0.0:2375 --storage-driver=overlay --registry-mirror=http://$DOCKER_IP:5000,', /usr/lib/systemd/system/docker.service]
+- [mkdir, -p, /qserv]
+- [mkdir, -p, /mnt/qserv]
+- [mkdir, -p, /qserv/log]
+- [mount, /dev/vdb1, /mnt/qserv]
+- [ln, -s, /mnt/qserv/data, /qserv/data]
+- [chown, -R, '1000:1000', /mnt/qserv]
+- [chown, -R, '1000:1000', /qserv]
+- [/bin/systemctl, daemon-reload]
+- [/bin/systemctl, restart,  docker.service]
+
+final_message: "FINDMEFINDMEFINDMEFINDME The system is finally up, after $UPTIME seconds FINDMEFINDMEFINDMEFINDME"

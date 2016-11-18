@@ -16,7 +16,7 @@ parameters:
         type: string
     image_id:
         type: string
-    name:
+    prefix:
         type: string
     network_name:
         type: string
@@ -24,8 +24,12 @@ parameters:
         type: string
     mount_point:
         type: string
+    docker_ip:
+        type: string
     volumes:
         type: comma_delimited_list
+#    volume:
+#        type: string
     index:
         type: number
 
@@ -36,9 +40,21 @@ resources:
             key_name: { get_param: key_name }
             flavor: { get_param: flavor_id }
             image: { get_param: image_id }
-            name: { get_param: name }
             networks:
                 - port: { get_resource: port }
+            user_data: 
+                str_replace:
+                    params:
+                        $DOCKER_IP: { get_param: docker_ip }
+                    template: { get_file: cloud-config.yaml }
+            user_data_format: RAW
+            name: 
+                str_replace: 
+                    template: $PREFIX-worker-$IDX
+                    params: 
+                        $PREFIX: { get_param: prefix }
+                        $IDX: { get_param: index }
+                
     port:
         type: OS::Neutron::Port
         properties:
@@ -49,6 +65,14 @@ resources:
         type: OS::Cinder::VolumeAttachment
         properties:
             mountpoint: { get_param: mount_point }
+            #volume_id: { get_param: volume }
             volume_id: { get_param: [ volumes, {get_param: index } ] }
             instance_uuid: { get_resource: instance }
 
+outputs:
+    instance_ip:
+        description: IP address of the deployed instance
+        value: { get_attr: [ instance, first_address ] }
+    port:
+        value: { get_resource: port }
+#EOF
