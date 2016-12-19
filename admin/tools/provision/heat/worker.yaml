@@ -24,7 +24,7 @@ parameters:
         type: string
     mount_point:
         type: string
-    docker_ip:
+    docker_registry_ip:
         type: string
     volumes:
         type: comma_delimited_list
@@ -45,7 +45,7 @@ resources:
             user_data: 
                 str_replace:
                     params:
-                        $DOCKER_IP: { get_param: docker_ip }
+                        $DOCKER_REGISTRY_IP: { get_param: docker_registry_ip }
                     template: { get_file: cloud-config.yaml }
             user_data_format: RAW
             name: 

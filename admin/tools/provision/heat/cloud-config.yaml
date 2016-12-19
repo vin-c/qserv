@@ -14,7 +14,7 @@ users:
 #- git
 
 runcmd:
-- [sed, -i, 's,ExecStart=/usr/bin/dockerd,ExecStart=/usr/bin/dockerd -H unix:///var/run/docker.sock -H tcp://0.0.0.0:2375 --storage-driver=overlay --registry-mirror=http://$DOCKER_IP:5000,', /usr/lib/systemd/system/docker.service]
+- [sed, -i, 's,ExecStart=/usr/bin/dockerd,ExecStart=/usr/bin/dockerd -H unix:///var/run/docker.sock -H tcp://0.0.0.0:2375 --storage-driver=overlay --registry-mirror=http://$DOCKER_REGISTRY_IP:5000,', /usr/lib/systemd/system/docker.service]
 - [mkdir, -p, /qserv]
 - [mkdir, -p, /mnt/qserv]
 - [mkdir, -p, /qserv/log]

@@ -84,7 +84,7 @@ resources:
                     network_name: { get_param: network_name }
                     subnet_name: { get_param: subnet_name }
                     mount_point: { get_param: mount_point }
-                    docker_ip: { get_attr: [ dr_instance, first_address ] }
+                    docker_registry_ip: { get_attr: [ dr_instance, first_address ] }
                     volumes: { get_param: volumes }
                     index: "%index%"
 ## SSH Gateway ##
