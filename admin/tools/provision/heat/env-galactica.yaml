@@ -2,13 +2,13 @@
 
 parameters:
     nb_instances: 3
-    prefix: vg-qserv
-    key_name: qserv-qserv
-    flavor_1c_2g: 2 
-    flavor_2c_2g: d30323c4-40b3-4ab0-96e1-d34263a795af
-    flavor_2c_4g: 3
-    flavor_4c_8g: 97d0df5f-ef44-416c-945a-0da9f2a6e4f3
-    image_id: ce467a12-3851-41fa-a694-e007ee4a25c3
+    prefix: bscheers-qserv
+    key_name: bscheers
+    flavor_1c_2g: 40a1f6b6-1af9-46da-942f-41321a3a45b7
+    flavor_2c_2g: e6d159a8-8cc3-40a9-b997-b86a8c2a01cf
+    flavor_2c_4g: 741075af-78c9-4bbd-9098-577935f6526a
+    flavor_4c_8g: c3af5c89-e93a-442e-9f44-87b3d2ad0a08
+    image_id: 2f953ce2-f13d-4dc6-b65f-b36ffe3d61d6
     network_name: petasky-net
     subnet_name: petasky-subnet
     public_network: ext-net
