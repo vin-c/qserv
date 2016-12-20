@@ -1,8 +1,3 @@
-# default values are set for Galactica (LIMOS)
-# keypair : qserv-qserv
-# flavor #3 : m1.medium : 2c/4G/40G
-# image : centos7-qserv (ce467a12-3851-41fa-a694-e007ee4a25c3)
-
 # See http://docs.openstack.org/developer/heat/template_guide/hot_spec.html
 
 heat_template_version: 2015-10-15
@@ -28,8 +23,6 @@ parameters:
         type: string
     volumes:
         type: comma_delimited_list
-#    volume:
-#        type: string
     index:
         type: number
 
@@ -54,7 +47,6 @@ resources:
                     params: 
                         $PREFIX: { get_param: prefix }
                         $IDX: { get_param: index }
-                
     port:
         type: OS::Neutron::Port
         properties:
@@ -65,7 +57,6 @@ resources:
         type: OS::Cinder::VolumeAttachment
         properties:
             mountpoint: { get_param: mount_point }
-            #volume_id: { get_param: volume }
             volume_id: { get_param: [ volumes, {get_param: index } ] }
             instance_uuid: { get_resource: instance }
 
