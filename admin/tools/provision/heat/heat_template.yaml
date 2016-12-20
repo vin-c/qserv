@@ -1,8 +1,3 @@
-# default values are set for Galactica (LIMOS)
-# keypair : qserv-qserv
-# flavor #3 : m1.medium : 2c/4G/40G
-# image : centos7-qserv (ce467a12-3851-41fa-a694-e007ee4a25c3)
-
 # See http://docs.openstack.org/developer/heat/template_guide/hot_spec.html
 
 heat_template_version: 2015-10-15
@@ -10,63 +5,121 @@ heat_template_version: 2015-10-15
 description: Launch VMs for qserv tests
 
 parameters:
+    nb_instances:
+        description: Number of instances to start
+        label: Number of instances to start
+        type: number
+    prefix:
+        description: Resource prefix
+        label: Resource prefix
+        type: string
     key_name:
         description: Name of an existing key pair to use for the instance
         label: Key Name
         type: string
         constraints:
             - custom_constraint: nova.keypair
-        default: qserv-qserv
-    flavor_id:
-        description: flavor (actually an integer)
-        label: Image ID
+    flavor_1c_2g:
+        description: Small flavor (typically 1c/2g)
+        label: Flavor ID
         type: string
-        default: 3
+    flavor_2c_2g:
+        description: Medium flavor (typically 2c/2g)
+        label: Flavor ID
+        type: string
+    flavor_2c_4g:
+        description: Large flavor (typically 2c/4g)
+        label: Flavor ID
+        type: string
+    flavor_4c_8g:
+        description: XLarge flavor (typically 4c/8g)
+        label: Flavor ID
+        type: string
     image_id:
         description: UUID of image
         label: Instance ID
         type: string
-        default: ce467a12-3851-41fa-a694-e007ee4a25c3
     network_name:
         description: Name of the network to connect to
         label: Network Name
         type: string
         constraints:
             - custom_constraint: neutron.network
-        default: petasky-net
     subnet_name:
         description: Name of the subnet to connect to
         label: Subnet Name
         type: string
         constraints:
             - custom_constraint: neutron.subnet
-        default: petasky-subnet
+    public_network:
+        description: Public network id
+        type: string
     mount_point:
         description: Name of the mount point
         label: Mount point
         type: string
-        default: /dev/vdb1
     volumes:
         description: List of ids and volume_ids
         type: comma_delimited_list
-        default: [d6ec3b01-8c9a-4677-842f-c1d054b1fa6c, b186380b-6afa-4bfc-a818-78eab6b6e810, 4a02fcc9-15fc-4a73-932a-0b2daf7897cb, cf74206a-af8f-411f-bfbf-44bae09b67e5, 53ff8f2b-1a9b-4de5-a2e7-300972c0a565, b99bf008-4ad7-4955-a43c-9c6da765aac1, b2e7ee05-f3f3-4f6e-a99d-679286c6bf9c, 260553e0-e930-4859-b66f-8b6b5f87600a, c7686977-af11-4151-a4ef-1b044f987b37, 034d6480-3545-4684-b909-5c67ceb14f7d, b7aee0bc-1f8b-464b-b072-025400da1054, 3b6aa4d4-0488-4322-ba00-acb1e8e01e69, 5938086c-2639-45e2-a734-070b891b3f4d, db20d42b-6843-4387-a6b4-9b3e167f7b9b, 729dcbb7-c6f1-4773-aaa6-b6c9239dc366, 2935283a-558b-45ff-ba9f-c713d1dd95d3, f0bdfbcc-fc6b-49d6-827b-96ac618e1398, 865ba378-2a1e-45a9-91b1-eb1a564704f3, a4620531-03d3-4732-8cfd-415d6800007e, 2412b66d-5680-4018-9139-bca836830935, 7560091e-b84a-47ce-aefe-625a5dd07d46, 3b41d679-77ba-4e04-9498-a2cbab36a498, fb00f47c-1f49-4fad-b9bc-c872ec7a9994, d098736b-5ce7-45c9-a8ea-a92dea492efa, 729ec3fe-e9b7-4380-91ea-25ba84116f6d]
 
 resources:
+## Worker Cluster Group ##
     worker_group:
         type: OS::Heat::ResourceGroup
         properties:
-            count: 25
+            count: { get_param: nb_instances }
             resource_def: 
-                type: worker.yaml
+                type: OS::Qserv::Worker
                 properties:
                     key_name: { get_param: key_name }
-                    flavor_id: { get_param: flavor_id }
+                    flavor_id: { get_param: flavor_2c_4g }
                     image_id: { get_param: image_id }
-                    name: vg-qserv-%index%
+                    prefix: { get_param: prefix }
                     network_name: { get_param: network_name }
                     subnet_name: { get_param: subnet_name }
                     mount_point: { get_param: mount_point }
                     volumes: { get_param: volumes }
                     index: "%index%"
+## SSH Gateway ##
+    gw_instance:
+        type: OS::Nova::Server
+        properties:
+            key_name: { get_param: key_name }
+            flavor: { get_param: flavor_1c_2g }
+            image: { get_param: image_id }
+            name: 
+                str_replace: 
+                    template: $PREFIX-gateway
+                    params:
+                        $PREFIX: { get_param: prefix }
 
+            networks:
+                - port: { get_resource: gw_port }
+            user_data: { get_file: cloud-config-gw.yaml }
+            user_data_format: RAW
+    gw_port:
+        type: OS::Neutron::Port
+        properties:
+            network: { get_param: network_name }
+            fixed_ips:
+                - subnet_id: { get_param: subnet_name }
+    gw_fip:
+        type: OS::Neutron::FloatingIP
+        properties:
+            floating_network_id: { get_param: public_network }
+            port_id: { get_resource: gw_port } 
+
+outputs:
+    all_ips:
+        description: All instance IPs
+        value: { get_attr: [ worker_group, instance_ip ] }
+    r0_port:
+        description: instance_0 port
+        value: { get_attr: [ worker_group, resource.0.port ] }
+    gateway_ip:
+        description: IP to connect to
+        value: { get_attr: [ gw_fip, floating_ip_address ] }
+    volume_0:
+        description: Volume_0 ID
+        value: { get_param: [ volumes, 0 ] }
 # EOF
