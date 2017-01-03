@@ -7,6 +7,8 @@
 # https://github.com/docker/docker.github.io/blob/master/registry/recipes/mirror.md
 
 # The resulting script can be found for debugging purposes in /var/lib/cloud/instance/scripts/runcmd
+groups:
+- docker
  
 users:
 - name: qserv
@@ -44,14 +46,20 @@ write_files:
     proxy:
       remoteurl: https://registry-1.docker.io
 
+package_upgrade: true
+packages:
+- git
+
 runcmd:
-- 'mkdir -p /data'
+#- 'mkdir -p /data'
+
 #- 'docker run -it --rm --entrypoint cat registry:2 /etc/docker/registry/config.yml) >> /data/config.yml'
 #- 'sed -i "s,/var/lib/registry,/data,g" /data/config.yml'
 #- 'echo -e "proxy:\n  remoteurl: https://registry-1.docker.io" >> /data/config.yml'
-- 'mv /tmp/config.yml /data'
-- '/bin/systemctl daemon-reload'
-- '/bin/systemctl restart docker.service'
-- 'docker run -d --restart=always -p 5000:5000 --name v2-mirror -v /data:/var/lib/registry registry:2 /var/lib/registry/config.yml'
+
+#- 'mv /tmp/config.yml /data'
+#- '/bin/systemctl daemon-reload'
+#- '/bin/systemctl restart docker.service'
+#- 'docker run -d --restart=always -p 5000:5000 --name v2-mirror -v /data:/var/lib/registry registry:2 /var/lib/registry/config.yml'
 
 final_message: "FINDMEFINDMEFINDMEFINDME The system is finally up, after $UPTIME seconds FINDMEFINDMEFINDMEFINDME"
