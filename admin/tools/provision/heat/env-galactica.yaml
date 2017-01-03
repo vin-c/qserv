@@ -2,13 +2,14 @@
 
 parameters:
     nb_instances: 3
-    prefix: bscheers-qserv
-    key_name: bscheers
+    prefix: vgatignol-qserv
+    key_name: vinc-4k
     flavor_1c_2g: 40a1f6b6-1af9-46da-942f-41321a3a45b7
     flavor_2c_2g: e6d159a8-8cc3-40a9-b997-b86a8c2a01cf
     flavor_2c_4g: 741075af-78c9-4bbd-9098-577935f6526a
     flavor_4c_8g: c3af5c89-e93a-442e-9f44-87b3d2ad0a08
-    image_id: 2f953ce2-f13d-4dc6-b65f-b36ffe3d61d6
+    qserv_image_id: 2f953ce2-f13d-4dc6-b65f-b36ffe3d61d6
+    centos_image_id: 4b510e70-7824-4df1-907a-d640d40d2fc0
     network_name: petasky-net
     subnet_name: petasky-subnet
     public_network: ext-net
