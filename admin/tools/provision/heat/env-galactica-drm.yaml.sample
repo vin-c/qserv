@@ -1,0 +1,12 @@
+# Environment file for galactica @ LIMOS
+# Used for creating a Docker Registry Mirror
+
+parameters:
+   key_name: qserv-qserv
+   flavor: 40a1f6b6-1af9-46da-942f-41321a3a45b7
+   qserv_image_id: 2f953ce2-f13d-4dc6-b65f-b36ffe3d61d6
+   network_name: petasky-net
+   subnet_name: petasky-subnet
+   public_network: ext-net
+   swift_user: --to-be-updated--
+   swift_pass: --to-be-updated--

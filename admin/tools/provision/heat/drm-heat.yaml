@@ -1,0 +1,77 @@
+# See http://docs.openstack.org/developer/heat/template_guide/hot_spec.html
+
+heat_template_version: 2015-10-15
+
+description: Launch a Docker Registry Mirror
+
+parameters:
+   key_name:
+      description: Name of an existing key pair to use for the instance
+      label: Key Name
+      type: string
+      default: vinc-4k
+      constraints:
+         - custom_constraint: nova.keypair
+   flavor:
+      description: Small flavor (typically 1c/2g)
+      label: Flavor ID
+      type: string
+      default: 40a1f6b6-1af9-46da-942f-41321a3a45b7
+   swift_user:
+      description: Swift user to access object storage
+      type: string
+   swift_pass:
+      description: Swift password
+      type: string
+   qserv_image_id:
+      description: UUID of centos image for qserv (with docker)
+      label: Image ID
+      type: string
+   network_name:
+      description: Name of the network to connect to
+      label: Network Name
+      type: string
+      constraints:
+         - custom_constraint: neutron.network
+   subnet_name:
+      description: Name of the subnet to connect to
+      label: Subnet Name
+      type: string
+      constraints:
+         - custom_constraint: neutron.subnet
+   public_network:
+      description: Public network id
+      type: string
+
+resources:
+## Docker Registry Mirror ##
+   dr_instance:
+      type: OS::Nova::Server
+      properties:
+         key_name: { get_param: key_name }
+         flavor: { get_param: flavor }
+         image: { get_param: qserv_image_id }
+         networks:
+            - port: { get_resource: dr_port }
+         user_data:
+            str_replace:
+               params:
+                  $DOCKER_REGISTRY_IP: { get_attr: [ dr_port, fixed_ips, 0, ip_address ] }
+                  $SWIFT_USER: { get_param: swift_user }
+                  $SWIFT_PASS: { get_param: swift_pass }
+               template: { get_file: cloud-config-dr.yaml }
+         user_data_format: RAW
+         name: docker-registry-mirror 
+
+   dr_port:
+      type: OS::Neutron::Port
+      properties:
+         network: { get_param: network_name }
+         fixed_ips:
+            - subnet_id: { get_param: subnet_name }
+
+outputs:
+    docker_registry_ip:
+        description: Local docker-registry IP
+        value: { get_attr: [ dr_instance, first_address ] }
+# EOF
