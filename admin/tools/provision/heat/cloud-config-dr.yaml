@@ -49,6 +49,9 @@ write_files:
 package_upgrade: true
 packages:
 - git
+- zsh
+- screen
+- vim
 
 runcmd:
 #- 'mkdir -p /data'
