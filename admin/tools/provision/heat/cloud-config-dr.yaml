@@ -7,9 +7,7 @@
 # https://github.com/docker/docker.github.io/blob/master/registry/recipes/mirror.md
 
 # The resulting script can be found for debugging purposes in /var/lib/cloud/instance/scripts/runcmd
-groups:
-- docker
- 
+
 users:
 - name: qserv
   gecos: "Qserv daemon"
@@ -21,48 +19,43 @@ users:
   - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCaTEm2HSvs7JyS2aQpUSKtB0osuyfWQkl7SQ8U8GPHqkQd5k1HGeCS/GXQgk8ghlHJngsuV57mRKrefY7HkRjwQzmOqwoFXLJ7VS7Mu4AqIHNfwdxBxennYxW9fxZrlrPSRIsQIwXW6u3n7xB7qBr7jnEE3ob+4nzFX40h2tgtm0ZhUgeQoBqFsn0FFEn1DSixHxgRjthYHAfQVIJLosYM4k+cmDAlFLJ/7RmIEPYa3wjb8Chpy1Mx4VA0OwsXZo4rLdPhPAjmjagCcjn2hP+vum+DBmN9BeyjJZy6zOAZzdhXiANqMDEDIfUigBOk9Og9beNdYC3L0xjkS1VXI4C6iBt105fAjsOqzZiLIHbVsy1xdOeb+GG2OZLXqp0BJIQeP4i3+nPoKLlor6Ms18tRovT0OPlUt9Z/F4ocn+pSIqKNE2jDrJVDpi6H0S5ZhO9TMCi1UU6cFdi5LcUPvq6jeLj392tSOH9Mre6jolBzxLzlP6uLp6mrDZpRtnO4hJu4BMsMD4MNUJFdvGdkFTZ4V7AyVFpkLfRkqScvlkOOXOji9ll6FHl8c8VgyIClJrNb3c/PCoThTS0u44Skj9zqsTs9qqwp1aeH3m2AemLOe43R2heF4OP3+o3XjZb66XiftgGB5ogidmCxu+BIUVgs3qNvT/Jjm9LcgGGVf7vaRQ==
 
 write_files:
-- path: /tmp/config.yml
+- path: /etc/docker/registry-config.yml
   permissions: '0644'
   owner: root:root
   content: |
-    version: 0.1
-    log:
-      fields:
-        service: registry
-    storage:
-      cache:
-        blobdescriptor: inmemory
-      filesystem:
-        rootdirectory: /data
-    http:
-      addr: :5000
-      headers:
-        X-Content-Type-Options: [nosniff]
-    health:
-      storagedriver:
-        enabled: true
-        interval: 10s
-        threshold: 3
-    proxy:
-      remoteurl: https://registry-1.docker.io
+   version: 0.1
+   log:
+     level: debug
+     formatter: text
+     fields:
+       service: registry
+   storage:
+     cache:
+       blobdescriptor: inmemory
+     swift:
+       username: $SWIFT_USER
+       password: $SWIFT_PASS
+       authurl: https://api.isima.fr:5000/v2.0
+       tenant: petasky
+       tenantid: d2521c9ab5c4452b802e50d05cee83e1
+       container: docker_registry_mirror
+   http:
+     addr: :5000
+     headers:
+       X-Content-Type-Options: [nosniff]
+   health:
+     storagedriver:
+       enabled: true
+       interval: 10s
+       threshold: 3
+   proxy:
+     remoteurl: https://registry-1.docker.io
 
 package_upgrade: true
-packages:
-- git
-- zsh
-- screen
-- vim
 
 runcmd:
-#- 'mkdir -p /data'
-
-#- 'docker run -it --rm --entrypoint cat registry:2 /etc/docker/registry/config.yml) >> /data/config.yml'
-#- 'sed -i "s,/var/lib/registry,/data,g" /data/config.yml'
-#- 'echo -e "proxy:\n  remoteurl: https://registry-1.docker.io" >> /data/config.yml'
-
-#- 'mv /tmp/config.yml /data'
-#- '/bin/systemctl daemon-reload'
-#- '/bin/systemctl restart docker.service'
-#- 'docker run -d --restart=always -p 5000:5000 --name v2-mirror -v /data:/var/lib/registry registry:2 /var/lib/registry/config.yml'
+- '/bin/systemctl daemon-reload'
+- '/bin/systemctl restart docker.service'
+- 'docker run -d --restart=always -p 5000:5000 --name registry-mirror -v /etc/docker/registry-config.yml:/etc/docker/registry/config.yml -e STANDALONE=false -e MIRROR_SOURCE=https://registry-1.docker.io -e MIRROR_SOURCE_INDEX=https://index.docker.io registry:2'
 
 final_message: "FINDMEFINDMEFINDMEFINDME The system is finally up, after $UPTIME seconds FINDMEFINDMEFINDMEFINDME"
