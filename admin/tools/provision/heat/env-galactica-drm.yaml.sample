@@ -12,6 +12,6 @@ parameters:
    tenant: petasky
    tenantid: d2521c9ab5c4452b802e50d05cee83e1
    container: docker_registry_mirror
-   ssh_pub: ssh-rsa AAAA...--to-be-updated--
-   swift_user: --to-be-updated--
-   swift_pass: --to-be-updated--
+   swift_user: qserv
+
+# Please update the file cloud-config-dr for swift_password and ssh-pub-key

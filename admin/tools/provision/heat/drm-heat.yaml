@@ -15,27 +15,6 @@ parameters:
       description: Small flavor (typically 1c/2g)
       label: Flavor ID
       type: string
-   swift_user:
-      description: Swift user to access object storage
-      type: string
-   swift_pass:
-      description: Swift password
-      type: string
-   authurl:
-      description: Auth URL for swift/openstack
-      type: string
-   tenant:
-      description: Openstack tenant
-      type: string
-   tenantid:
-      description: Openstack tenant ID
-      type: string
-   container:
-      description: Swift container name
-      type: string
-   ssh_pub:
-      description: Public ssh key (ssh-rsa AAA...) to be used by qserv user
-      type: string
    qserv_image_id:
       description: UUID of centos image for qserv (with docker)
       label: Image ID
@@ -55,6 +34,23 @@ parameters:
    public_network:
       description: Public network id
       type: string
+   swift_user:
+      description: Swift user to access object storage
+      type: string
+   authurl:
+      description: Public auth url (openstack api)
+      type: string
+   tenant:
+      description: Tenant name
+      type: string
+   tenantid:
+      description: Tenant id
+      type: string
+   container:
+      description: Swift container name
+      type: string
+
+   
 
 resources:
 ## Docker Registry Mirror ##
@@ -66,12 +62,10 @@ resources:
          image: { get_param: qserv_image_id }
          networks:
             - port: { get_resource: dr_port }
-         user_data:
+         user_data: 
             str_replace:
                params:
-                  $SSH_PUB: { get_param: ssh_pub }
                   $SWIFT_USER: { get_param: swift_user }
-                  $SWIFT_PASS: { get_param: swift_pass }
                   $AUTH_URL: { get_param: authurl }
                   $TENANT: { get_param: tenant }
                   $TENANT_ID: { get_param: tenantid }
