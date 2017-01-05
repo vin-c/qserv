@@ -1,3 +1,5 @@
-Launch a qserv cluster with HEAT :
+Launch a Docker Registry Mirror locally with SWIFT storage as a backend :
 
-```openstack stack create --template heat_template.yaml -e env-galactica.yaml qserv-stack-test```
+```openstack stack create --template drm_heat.yaml -e env-galactica-drm.yaml qserv-drm```
+
+For other HEAT recipes, please checkout the corresponding branches "heat-*"
