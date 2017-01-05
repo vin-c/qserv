@@ -9,19 +9,32 @@ parameters:
       description: Name of an existing key pair to use for the instance
       label: Key Name
       type: string
-      default: vinc-4k
       constraints:
          - custom_constraint: nova.keypair
    flavor:
       description: Small flavor (typically 1c/2g)
       label: Flavor ID
       type: string
-      default: 40a1f6b6-1af9-46da-942f-41321a3a45b7
    swift_user:
       description: Swift user to access object storage
       type: string
    swift_pass:
       description: Swift password
+      type: string
+   authurl:
+      description: Auth URL for swift/openstack
+      type: string
+   tenant:
+      description: Openstack tenant
+      type: string
+   tenantid:
+      description: Openstack tenant ID
+      type: string
+   container:
+      description: Swift container name
+      type: string
+   ssh_pub:
+      description: Public ssh key (ssh-rsa AAA...) to be used by qserv user
       type: string
    qserv_image_id:
       description: UUID of centos image for qserv (with docker)
@@ -56,9 +69,13 @@ resources:
          user_data:
             str_replace:
                params:
-                  $DOCKER_REGISTRY_IP: { get_attr: [ dr_port, fixed_ips, 0, ip_address ] }
+                  $SSH_PUB: { get_param: ssh_pub }
                   $SWIFT_USER: { get_param: swift_user }
                   $SWIFT_PASS: { get_param: swift_pass }
+                  $AUTH_URL: { get_param: authurl }
+                  $TENANT: { get_param: tenant }
+                  $TENANT_ID: { get_param: tenantid }
+                  $CONTAINER: { get_param: container }
                template: { get_file: cloud-config-dr.yaml }
          user_data_format: RAW
          name: docker-registry-mirror 
