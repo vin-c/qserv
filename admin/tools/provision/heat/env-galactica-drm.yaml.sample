@@ -2,16 +2,12 @@
 # Used for creating a Docker Registry Mirror
 
 parameters:
-   key_name: qserv-qserv
+   key_name: vinc-4k
    flavor: 40a1f6b6-1af9-46da-942f-41321a3a45b7
    qserv_image_id: 2f953ce2-f13d-4dc6-b65f-b36ffe3d61d6
    network_name: petasky-net
    subnet_name: petasky-subnet
    public_network: ext-net
-   authurl: https://api.isima.fr:5000/v2.0
-   tenant: petasky
-   tenantid: d2521c9ab5c4452b802e50d05cee83e1
-   container: docker_registry_mirror
-   swift_user: qserv
+   volume_id: 4b933d3d-710b-4e41-aef3-2a55931d624e
 
-# Please update the file cloud-config-dr for swift_password and ssh-pub-key
+# Please update the file cloud-config-dr for ssh-pub-key

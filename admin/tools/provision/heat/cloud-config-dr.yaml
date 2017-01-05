@@ -32,13 +32,17 @@ write_files:
    storage:
      cache:
        blobdescriptor: inmemory
-     swift:
-       username: $SWIFT_USER
-       password: --to-be-updated--
-       authurl: $AUTH_URL
-       tenant: $TENANT
-       tenantid: $TENANT_ID
-       container: $CONTAINER
+     filesystem:
+       rootdirectory: /data
+       maxthreads: 100
+     maintenance:
+       uploadpurging:
+         enabled: true
+         age: 168h
+         interval: 24h
+         dryrun: false
+       readonly:
+         enabled: false
    http:
      addr: :5000
      headers:
@@ -54,8 +58,10 @@ write_files:
 package_upgrade: true
 
 runcmd:
+- 'mkdir -p /data'
+- 'mount /dev/vdb /data'
 - '/bin/systemctl daemon-reload'
 - '/bin/systemctl restart docker.service'
-- 'docker run -d --restart=always -p 5000:5000 --name registry-mirror -v /etc/docker/registry-config.yml:/etc/docker/registry/config.yml -e STANDALONE=false -e MIRROR_SOURCE=https://registry-1.docker.io -e MIRROR_SOURCE_INDEX=https://index.docker.io registry:2'
+- 'docker run -d --restart=always -p 5000:5000 --name registry-mirror -v /etc/docker/registry-config.yml:/etc/docker/registry/config.yml -v /data:/data -e STANDALONE=false -e MIRROR_SOURCE=https://registry-1.docker.io -e MIRROR_SOURCE_INDEX=https://index.docker.io registry:2'
 
 final_message: "FINDMEFINDMEFINDMEFINDME The system is finally up, after $UPTIME seconds FINDMEFINDMEFINDMEFINDME"

@@ -34,23 +34,9 @@ parameters:
    public_network:
       description: Public network id
       type: string
-   swift_user:
-      description: Swift user to access object storage
-      type: string
-   authurl:
-      description: Public auth url (openstack api)
-      type: string
-   tenant:
-      description: Tenant name
-      type: string
-   tenantid:
-      description: Tenant id
-      type: string
-   container:
-      description: Swift container name
-      type: string
-
-   
+   volume_id:
+      description: Existing Volume ID to store cached docker images
+      type: string   
 
 resources:
 ## Docker Registry Mirror ##
@@ -62,18 +48,16 @@ resources:
          image: { get_param: qserv_image_id }
          networks:
             - port: { get_resource: dr_port }
-         user_data: 
-            str_replace:
-               params:
-                  $SWIFT_USER: { get_param: swift_user }
-                  $AUTH_URL: { get_param: authurl }
-                  $TENANT: { get_param: tenant }
-                  $TENANT_ID: { get_param: tenantid }
-                  $CONTAINER: { get_param: container }
-               template: { get_file: cloud-config-dr.yaml }
+         user_data: { get_file: cloud-config-dr.yaml }
          user_data_format: RAW
          name: docker-registry-mirror 
 
+   dr_volume:
+      type: OS::Cinder::VolumeAttachment
+      properties:
+         mountpoint: /dev/vdb
+         volume_id: { get_param: volume_id }
+         instance_uuid: { get_resource: dr_instance }
    dr_port:
       type: OS::Neutron::Port
       properties:
